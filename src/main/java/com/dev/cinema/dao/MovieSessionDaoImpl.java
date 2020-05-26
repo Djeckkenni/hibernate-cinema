@@ -43,7 +43,7 @@ public class MovieSessionDaoImpl implements MovieSessionDao {
             if (transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new DataProcessingException("Can't retrieve available sessions", e);
+            throw new DataProcessingException("Can't insert movie entity", e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();

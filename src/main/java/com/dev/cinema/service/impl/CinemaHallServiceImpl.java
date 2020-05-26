@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public class CinemaHallServiceImpl implements CinemaHallService {
     @Inject
-    private CinemaHallDao cinemaHallDao;
+    CinemaHallDao cinemaHallDao;
 
     @Override
     public CinemaHall add(CinemaHall cinemaHall) {
