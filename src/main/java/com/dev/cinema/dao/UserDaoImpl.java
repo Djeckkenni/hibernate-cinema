@@ -1,24 +1,32 @@
 package com.dev.cinema.dao;
 
 import com.dev.cinema.exception.DataProcessingException;
-import com.dev.cinema.lib.Dao;
 import com.dev.cinema.model.User;
-import com.dev.cinema.util.HibernateUtil;
 import java.util.Optional;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-@Dao
+@Repository
 public class UserDaoImpl implements UserDao {
+    private final SessionFactory sessionFactory;
+
+    @Autowired
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     public User add(User user) {
         Session session = null;
         Transaction transaction = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
             session.save(user);
             transaction.commit();
@@ -37,15 +45,14 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
             CriteriaQuery<User> criteriaQuery = criteriaBuilder
                     .createQuery(User.class);
             Root<User> root = criteriaQuery.from(User.class);
             Predicate predicateEmail = criteriaBuilder.equal(root.get("email"), email);
             criteriaQuery.where(predicateEmail);
-            User user = session.createQuery(criteriaQuery).uniqueResult();
-            return Optional.ofNullable(user);
+            return session.createQuery(criteriaQuery).uniqueResultOptional();
         } catch (Exception e) {
             throw new DataProcessingException("Can't find user with email "
                     + email, e);
