@@ -46,9 +46,9 @@ public class OrderDaoImpl implements OrderDao {
     public List<Order> getOrderHistory(User user) {
         try (Session session = sessionFactory.openSession()) {
             Query<Order> query = session
-                    .createQuery("from Order o "
+                    .createQuery("select distinct o from Order o "
                             + "left join fetch o.tickets Ticket "
-                            + " where o.user =: user", Order.class);
+                            + "where o.user =: user", Order.class);
             query.setParameter("user", user);
             return query.list();
         } catch (Exception e) {

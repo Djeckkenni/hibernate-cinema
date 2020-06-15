@@ -22,11 +22,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Main {
-
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context
                 = new AnnotationConfigApplicationContext(AppConfig.class);
@@ -55,7 +53,7 @@ public class Main {
         user.setPassword("1");
         UserService userService = context.getBean(UserService.class);
         userService.add(user);
-        Optional<User> user1 = userService.findByEmail("bob");
+        User user1 = userService.findByEmail("bob");
         System.out.println(user1);
         AuthenticationService authenticationService =
                 context.getBean(AuthenticationService.class);
