@@ -2,6 +2,7 @@ package com.dev.cinema.controllers;
 
 import com.dev.cinema.model.Movie;
 import com.dev.cinema.model.dto.MovieDto;
+import com.dev.cinema.model.mapper.MovieMapper;
 import com.dev.cinema.service.MovieService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,12 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MovieController {
     @Autowired
     private final MovieService movieService;
+    private final MovieMapper movieMapper;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(MovieService movieService, MovieMapper movieMapper) {
         this.movieService = movieService;
+        this.movieMapper = movieMapper;
     }
 
-    @PostMapping("/add")
+    @PostMapping("/addmovie")
     public String addMovie(@RequestBody MovieDto movieDto) {
         Movie movie = new Movie();
         movie.setTitle(movieDto.getTitle());
@@ -34,13 +37,6 @@ public class MovieController {
     @GetMapping
     public List<MovieDto> getAllMovies() {
         List<Movie> movies = movieService.getAll();
-        return movies.stream().map(this::getMovieDto).collect(Collectors.toList());
-    }
-
-    private MovieDto getMovieDto(Movie movie) {
-        MovieDto movieDto = new MovieDto();
-        movieDto.setDescription(movie.getDescription());
-        movieDto.setTitle(movie.getTitle());
-        return movieDto;
+        return movies.stream().map(movieMapper::getMovieDto).collect(Collectors.toList());
     }
 }

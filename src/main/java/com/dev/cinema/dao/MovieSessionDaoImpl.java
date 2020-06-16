@@ -34,7 +34,7 @@ public class MovieSessionDaoImpl implements MovieSessionDao {
             Root<MovieSession> root = criteriaQuery.from(MovieSession.class);
             Predicate predicateId = criteriaBuilder.equal(root.get("movie"), movieId);
             Predicate predicateDate = criteriaBuilder.greaterThan(root.get("showTime"),
-                    LocalDateTime.of(date, LocalTime.now()));
+                    LocalDateTime.of(date, LocalTime.from(date.atStartOfDay())));
             criteriaQuery.where(predicateId, predicateDate);
             return session.createQuery(criteriaQuery).getResultList();
         } catch (Exception e) {

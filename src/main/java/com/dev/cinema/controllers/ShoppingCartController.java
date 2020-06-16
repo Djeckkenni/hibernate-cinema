@@ -2,15 +2,12 @@ package com.dev.cinema.controllers;
 
 import com.dev.cinema.model.MovieSession;
 import com.dev.cinema.model.ShoppingCart;
-import com.dev.cinema.model.Ticket;
 import com.dev.cinema.model.User;
 import com.dev.cinema.model.dto.ShoppingCartResponseDto;
-import com.dev.cinema.model.dto.TicketDto;
+import com.dev.cinema.model.mapper.ShoppingCartMapper;
 import com.dev.cinema.service.MovieSessionService;
 import com.dev.cinema.service.ShoppingCartService;
 import com.dev.cinema.service.UserService;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,20 +21,22 @@ public class ShoppingCartController {
     private final MovieSessionService movieSessionService;
     private final ShoppingCartService shoppingCartService;
     private final UserService userService;
+    private final ShoppingCartMapper shoppingCartMapper;
 
     public ShoppingCartController(MovieSessionService movieSessionService,
                                   ShoppingCartService shoppingCartService,
-                                  UserService userService) {
+                                  UserService userService, ShoppingCartMapper shoppingCartMapper) {
         this.movieSessionService = movieSessionService;
         this.shoppingCartService = shoppingCartService;
         this.userService = userService;
+        this.shoppingCartMapper = shoppingCartMapper;
     }
 
     @GetMapping("/byuser")
     public ShoppingCartResponseDto getCartByUser(@RequestParam Long userId) {
         User user = userService.getById(userId);
         ShoppingCart shoppingCart = shoppingCartService.getByUser(user);
-        return convertToShoppingCartDto(shoppingCart);
+        return shoppingCartMapper.convertToShoppingCartDto(shoppingCart);
     }
 
     @PostMapping("/addmoviesession/{movieSessionId}")
@@ -47,23 +46,5 @@ public class ShoppingCartController {
         MovieSession movieSession = movieSessionService.getById(movieSessionId);
         shoppingCartService.addSession(movieSession, user);
         return "Movie session was successfully added to shopping cart";
-    }
-
-    private ShoppingCartResponseDto convertToShoppingCartDto(ShoppingCart shoppingCart) {
-        ShoppingCartResponseDto shoppingCartResponseDto = new ShoppingCartResponseDto();
-        shoppingCartResponseDto.setUserId(shoppingCart.getUser().getId());
-        List<TicketDto> tickets = shoppingCart.getTickets().stream()
-                .map(this::convertToTicketDto)
-                .collect(Collectors.toList());
-        shoppingCartResponseDto.setTickets(tickets);
-        return shoppingCartResponseDto;
-    }
-
-    private TicketDto convertToTicketDto(Ticket ticket) {
-        TicketDto ticketDto = new TicketDto();
-        ticketDto.setMovieTitle(ticket.getMovieSession().getMovie().getTitle());
-        ticketDto.setCinemaHallId(ticket.getMovieSession().getCinemaHall().getId());
-        ticketDto.setShowTime(ticket.getMovieSession().getShowTime().toString());
-        return ticketDto;
     }
 }

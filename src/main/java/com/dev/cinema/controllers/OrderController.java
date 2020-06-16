@@ -2,11 +2,10 @@ package com.dev.cinema.controllers;
 
 import com.dev.cinema.model.Order;
 import com.dev.cinema.model.ShoppingCart;
-import com.dev.cinema.model.Ticket;
 import com.dev.cinema.model.User;
 import com.dev.cinema.model.dto.OrderRequestDto;
 import com.dev.cinema.model.dto.OrderResponseDto;
-import com.dev.cinema.model.dto.TicketDto;
+import com.dev.cinema.model.mapper.OrderMapper;
 import com.dev.cinema.service.OrderService;
 import com.dev.cinema.service.ShoppingCartService;
 import com.dev.cinema.service.UserService;
@@ -26,13 +25,16 @@ public class OrderController {
     private final OrderService orderService;
     private final ShoppingCartService shoppingCartService;
     private final UserService userService;
+    private final OrderMapper orderMapper;
 
     @Autowired
     public OrderController(OrderService orderService,
-                           ShoppingCartService shoppingCartService, UserService userService) {
+                           ShoppingCartService shoppingCartService,
+                           UserService userService, OrderMapper orderMapper) {
         this.orderService = orderService;
         this.shoppingCartService = shoppingCartService;
         this.userService = userService;
+        this.orderMapper = orderMapper;
     }
 
     @GetMapping
@@ -40,7 +42,7 @@ public class OrderController {
         User user = userService.getById(userId);
         List<Order> orders = orderService.getOrderHistory(user);
         return orders.stream()
-                .map(this::getOrderDto)
+                .map(orderMapper::getOrderDto)
                 .collect(Collectors.toList());
     }
 
@@ -50,24 +52,5 @@ public class OrderController {
         ShoppingCart shoppingCart = shoppingCartService.getByUser(user);
         orderService.completeOrder(shoppingCart.getTickets(), user);
         return "Order was successfully completed";
-    }
-
-    private OrderResponseDto getOrderDto(Order order) {
-        OrderResponseDto orderResponseDto = new OrderResponseDto();
-        orderResponseDto.setOrderDate(order.getOrderDate().toString());
-        List<TicketDto> tickets = order.getTickets().stream()
-                .map(this::getTicketDto)
-                .collect(Collectors.toList());
-        orderResponseDto.setTickets(tickets);
-        return orderResponseDto;
-    }
-
-    private TicketDto getTicketDto(Ticket ticket) {
-        TicketDto ticketDto = new TicketDto();
-        ticketDto.setMovieTitle(ticket.getMovieSession().getMovie().getTitle());
-        ticketDto.setCinemaHallId(ticket.getMovieSession()
-                .getCinemaHall().getId());
-        ticketDto.setShowTime(ticket.getMovieSession().getShowTime().toString());
-        return ticketDto;
     }
 }
