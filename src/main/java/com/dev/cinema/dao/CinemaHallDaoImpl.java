@@ -50,14 +50,22 @@ public class CinemaHallDaoImpl implements CinemaHallDao {
             CriteriaQuery<CinemaHall> criteriaQuery = session.getCriteriaBuilder()
                     .createQuery(CinemaHall.class);
             criteriaQuery.from(CinemaHall.class);
-            List<CinemaHall> resultList = session.createQuery(criteriaQuery).getResultList();
-            return resultList;
+            return session.createQuery(criteriaQuery).getResultList();
         } catch (Exception e) {
             throw new DataProcessingException("Error retrieving all cinema halls", e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
             }
+        }
+    }
+
+    @Override
+    public CinemaHall getById(Long cinemaHallId) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(CinemaHall.class, cinemaHallId);
+        } catch (Exception e) {
+            throw new DataProcessingException("Can't get cinema hall with id = " + cinemaHallId, e);
         }
     }
 }

@@ -7,7 +7,6 @@ import com.dev.cinema.model.ShoppingCart;
 import com.dev.cinema.model.Ticket;
 import com.dev.cinema.model.User;
 import com.dev.cinema.service.ShoppingCartService;
-import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ticket.setMovieSession(movieSession);
         ticket.setUser(user);
         ShoppingCart shoppingCart = getByUser(user);
-        shoppingCart.setOrderDate(LocalDateTime.now());
         shoppingCart.getTickets().add(ticket);
         ticketDao.add(ticket);
         shoppingCartDao.update(shoppingCart);
