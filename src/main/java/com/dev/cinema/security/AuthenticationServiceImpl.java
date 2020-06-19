@@ -6,29 +6,27 @@ import com.dev.cinema.model.User;
 import com.dev.cinema.service.RoleService;
 import com.dev.cinema.service.UserService;
 import java.util.Set;
+
+import com.dev.cinema.util.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final HashUtil hashUtil;
     private final UserService userService;
-    private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public AuthenticationServiceImpl(UserService userService,
-                                     RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AuthenticationServiceImpl(HashUtil hashUtil, UserService userService) {
+        this.hashUtil = hashUtil;
         this.userService = userService;
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User login(String email, String password) throws AuthenticationException {
         User user = userService.findByEmail(email);
         if (user != null
-                && passwordEncoder.encode(user.getPassword()).equals(user.getPassword())) {
+                && hashUtil.hashPassword(password, user.getSalt()).equals(user.getPassword())) {
             return user;
         }
         throw new AuthenticationException("Incorrect email or password!!!");
@@ -37,9 +35,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public User register(String email, String password) {
         User user = new User();
-        user.setPassword(passwordEncoder.encode(password));
-        Role role = roleService.getRoleByName("USER");
-        user.setRoles(Set.of(role));
+        user.setEmail(email);
+        user.setSalt(hashUtil.getSalt());
+        user.setPassword(hashUtil.hashPassword(password, user.getSalt()));
         return userService.add(user);
     }
 }
