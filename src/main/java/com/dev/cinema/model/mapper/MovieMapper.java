@@ -1,15 +1,24 @@
 package com.dev.cinema.model.mapper;
 
 import com.dev.cinema.model.Movie;
-import com.dev.cinema.model.dto.MovieDto;
+import com.dev.cinema.model.dto.MovieRequestDto;
+import com.dev.cinema.model.dto.MovieResponseDto;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MovieMapper {
-    public MovieDto getMovieDto(Movie movie) {
-        MovieDto movieDto = new MovieDto();
-        movieDto.setDescription(movie.getDescription());
-        movieDto.setTitle(movie.getTitle());
-        return movieDto;
+
+    public Movie convertToMovie(MovieRequestDto movieRequestDto) {
+        Movie movie = new Movie();
+        movie.setTitle(movieRequestDto.getTitle());
+        movie.setDescription(movieRequestDto.getDescription());
+        return movie;
+    }
+
+    public MovieResponseDto convertToResponseDto(Movie movie) {
+        MovieResponseDto movieResponseDto = new MovieResponseDto();
+        movieResponseDto.setTitle(movie.getTitle());
+        movieResponseDto.setDescription(movie.getDescription());
+        return movieResponseDto;
     }
 }

@@ -1,6 +1,5 @@
 package com.dev.cinema.security;
 
-import com.dev.cinema.model.Role;
 import com.dev.cinema.model.User;
 import com.dev.cinema.service.UserService;
 import org.springframework.security.core.userdetails.User.UserBuilder;
@@ -19,16 +18,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByEmail(email);
-        UserBuilder userBuilder;
+        User user = userService.getByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found.");
         }
-        userBuilder = org.springframework.security.core.userdetails
+        UserBuilder userBuilder = org.springframework.security.core.userdetails
                 .User.withUsername(email);
         userBuilder.password(user.getPassword());
         String[] roles = user.getRoles().stream()
-                .map(Role::getRoleName)
+                .map(role -> role.getRoleName().name())
                 .toArray(String[]::new);
         userBuilder.roles(roles);
         return userBuilder.build();

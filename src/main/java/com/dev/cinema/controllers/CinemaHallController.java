@@ -1,6 +1,7 @@
 package com.dev.cinema.controllers;
 
 import com.dev.cinema.model.CinemaHall;
+import com.dev.cinema.model.dto.CinemaHallRequestDto;
 import com.dev.cinema.model.dto.CinemaHallResponseDto;
 import com.dev.cinema.model.mapper.CinemaHallMapper;
 import com.dev.cinema.service.CinemaHallService;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cinemahalls")
+@RequestMapping("/cinema-halls")
 public class CinemaHallController {
     private final CinemaHallService cinemaHallService;
     private final CinemaHallMapper cinemaHallMapper;
@@ -28,17 +29,15 @@ public class CinemaHallController {
     }
 
     @GetMapping
-    List<CinemaHallResponseDto> getAllCinemaHalls() {
-        List<CinemaHall> halls = cinemaHallService.getAll();
-        return halls.stream().map(cinemaHallMapper::getCinemaHallDto).collect(Collectors.toList());
+    public List<CinemaHallResponseDto> getCinemaHalls() {
+        List<CinemaHall> cinemaHalls = cinemaHallService.getAll();
+        return cinemaHalls.stream()
+                .map(cinemaHallMapper::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    @PostMapping("/addcinemahall")
-    public String addCinemaHall(@RequestBody @Valid CinemaHallResponseDto cinemaHallResponseDto) {
-        CinemaHall cinemaHall = new CinemaHall();
-        cinemaHall.setCapacity(cinemaHallResponseDto.getCapacity());
-        cinemaHall.setDescription(cinemaHallResponseDto.getDescription());
-        cinemaHallService.add(cinemaHall);
-        return "Cinema hall was added!";
+    @PostMapping
+    public void addMovie(@RequestBody @Valid CinemaHallRequestDto cinemaHallRequestDto) {
+        cinemaHallService.add(cinemaHallMapper.convertToCinemaHall(cinemaHallRequestDto));
     }
 }

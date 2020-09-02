@@ -4,8 +4,6 @@ import com.dev.cinema.model.MovieSession;
 import com.dev.cinema.model.dto.MovieSessionRequestDto;
 import com.dev.cinema.model.dto.MovieSessionResponseDto;
 import com.dev.cinema.model.mapper.MovieSessionMapper;
-import com.dev.cinema.service.CinemaHallService;
-import com.dev.cinema.service.MovieService;
 import com.dev.cinema.service.MovieSessionService;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,21 +18,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/moviesessions")
+@RequestMapping("/movie-sessions")
 public class MovieSessionController {
-    private final CinemaHallService cinemaHallService;
     private final MovieSessionService movieSessionService;
-    private final MovieService movieService;
     private final MovieSessionMapper movieSessionMapper;
 
     @Autowired
-    public MovieSessionController(CinemaHallService cinemaHallService,
-                                  MovieSessionService movieSessionService,
-                                  MovieService movieService,
+    public MovieSessionController(MovieSessionService movieSessionService,
                                   MovieSessionMapper movieSessionMapper) {
-        this.cinemaHallService = cinemaHallService;
         this.movieSessionService = movieSessionService;
-        this.movieService = movieService;
         this.movieSessionMapper = movieSessionMapper;
     }
 
@@ -42,16 +34,14 @@ public class MovieSessionController {
     public List<MovieSessionResponseDto> getMovieSessions(@RequestParam Long movieId,
                                                           @RequestParam LocalDate date) {
         List<MovieSession> availableSessions = movieSessionService
-                .findAvailableSessions(movieId, date);
+                .getAvailableSessions(movieId, date);
         return availableSessions.stream()
-                .map(movieSessionMapper::getMovieSessionDto)
+                .map(movieSessionMapper::convertToResponseDto)
                 .collect(Collectors.toList());
     }
 
-    @PostMapping("/addmoviesession")
-    public String addMovieSession(@RequestBody
-                                      @Valid MovieSessionRequestDto movieSessionRequestDto) {
-        movieSessionService.add(movieSessionMapper.getMovieSession(movieSessionRequestDto));
-        return "MovieSession was successful added";
+    @PostMapping
+    public void addMovieSession(@RequestBody @Valid MovieSessionRequestDto movieSessionRequestDto) {
+        movieSessionService.add(movieSessionMapper.convertToMovieSession(movieSessionRequestDto));
     }
 }

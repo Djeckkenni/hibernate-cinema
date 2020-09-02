@@ -4,38 +4,27 @@ import com.dev.cinema.exception.DataProcessingException;
 import com.dev.cinema.model.Role;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class RoleDaoImpl implements RoleDao {
+public class RoleDaoImpl extends GenericDaoImpl<Role> implements RoleDao {
     private final SessionFactory factory;
 
     public RoleDaoImpl(SessionFactory factory) {
+        super(factory);
         this.factory = factory;
     }
 
     @Override
     public Role add(Role role) {
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = factory.openSession();
-            transaction = session.beginTransaction();
-            session.save(role);
-            transaction.commit();
-            return role;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw new DataProcessingException("Can't insert Role entity", e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
+        role = super.add(role);
+        return role;
+    }
+
+    @Override
+    public Role getById(Long id) {
+        return super.getById(id, Role.class);
     }
 
     @Override
@@ -44,7 +33,7 @@ public class RoleDaoImpl implements RoleDao {
             Query<Role> query = session
                     .createQuery("from Role r "
                             + " where r.roleName =: roleName", Role.class);
-            query.setParameter("roleName", roleName);
+            query.setParameter("roleName", Role.RoleName.valueOf(roleName));
             return query.uniqueResult();
         } catch (Exception e) {
             throw new DataProcessingException("Can't find role with name "

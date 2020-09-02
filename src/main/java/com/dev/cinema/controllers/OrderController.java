@@ -40,18 +40,17 @@ public class OrderController {
 
     @GetMapping
     public List<OrderResponseDto> getOrdersByUser(Authentication authentication) {
-        User user = userService.findByEmail(authentication.getName());
+        User user = userService.getByEmail(authentication.getName());
         List<Order> orders = orderService.getOrderHistory(user);
         return orders.stream()
-                .map(orderMapper::getOrderDto)
+                .map(orderMapper::convertToResponseDto)
                 .collect(Collectors.toList());
     }
 
     @PostMapping("/complete")
-    public String completeOrder(@RequestBody @Valid OrderRequestDto orderRequestDto) {
+    public void completeOrder(@RequestBody @Valid OrderRequestDto orderRequestDto) {
         User user = userService.getById(orderRequestDto.getUserId());
         ShoppingCart shoppingCart = shoppingCartService.getByUser(user);
         orderService.completeOrder(shoppingCart.getTickets(), user);
-        return "Order was successfully completed";
     }
 }

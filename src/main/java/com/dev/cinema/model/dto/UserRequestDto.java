@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class UserRequestDto {
+    @NotNull(message = "Email can't be null!")
     @EmailConstraint
     private String email;
     @NotNull(message = "Password can't be null!")
