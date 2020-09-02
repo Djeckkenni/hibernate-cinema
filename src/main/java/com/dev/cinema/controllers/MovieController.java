@@ -1,7 +1,8 @@
 package com.dev.cinema.controllers;
 
 import com.dev.cinema.model.Movie;
-import com.dev.cinema.model.dto.MovieDto;
+import com.dev.cinema.model.dto.MovieRequestDto;
+import com.dev.cinema.model.dto.MovieResponseDto;
 import com.dev.cinema.model.mapper.MovieMapper;
 import com.dev.cinema.service.MovieService;
 import java.util.List;
@@ -17,27 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/movies")
 public class MovieController {
-    @Autowired
     private final MovieService movieService;
     private final MovieMapper movieMapper;
 
+    @Autowired
     public MovieController(MovieService movieService, MovieMapper movieMapper) {
         this.movieService = movieService;
         this.movieMapper = movieMapper;
     }
 
-    @PostMapping("/addmovie")
-    public String addMovie(@RequestBody @Valid MovieDto movieDto) {
-        Movie movie = new Movie();
-        movie.setTitle(movieDto.getTitle());
-        movie.setDescription(movieDto.getDescription());
-        movieService.add(movie);
-        return "movie was added";
+    @GetMapping
+    public List<MovieResponseDto> getMovies() {
+        List<Movie> movies = movieService.getAll();
+        return movies.stream()
+                .map(movieMapper::convertToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping
-    public List<MovieDto> getAllMovies() {
-        List<Movie> movies = movieService.getAll();
-        return movies.stream().map(movieMapper::getMovieDto).collect(Collectors.toList());
+    @PostMapping
+    public void addMovie(@RequestBody @Valid MovieRequestDto movieRequestDto) {
+        movieService.add(movieMapper.convertToMovie(movieRequestDto));
     }
 }

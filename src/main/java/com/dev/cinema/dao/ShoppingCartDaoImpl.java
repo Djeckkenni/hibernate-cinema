@@ -11,39 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ShoppingCartDaoImpl implements ShoppingCartDao {
-    private final SessionFactory sessionFactory;
+public class ShoppingCartDaoImpl extends GenericDaoImpl<ShoppingCart> implements ShoppingCartDao {
+    private final SessionFactory factory;
 
     @Autowired
-    public ShoppingCartDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public ShoppingCartDaoImpl(SessionFactory factory) {
+        super(factory);
+        this.factory = factory;
     }
 
     @Override
     public ShoppingCart add(ShoppingCart shoppingCart) {
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            session.save(shoppingCart);
-            transaction.commit();
-            return shoppingCart;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw new DataProcessingException("Can't insert ShoppingCart", e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
+        shoppingCart = super.add(shoppingCart);
+        return shoppingCart;
+    }
+
+    @Override
+    public ShoppingCart getById(Long id) {
+        return super.getById(id, ShoppingCart.class);
     }
 
     @Override
     public ShoppingCart getByUser(User user) {
-        try (Session session = sessionFactory.openSession()) {
+        try (Session session = factory.openSession()) {
             Query<ShoppingCart> query = session
                     .createQuery("from ShoppingCart c "
                             + "left join fetch c.tickets Ticket "
@@ -61,7 +51,7 @@ public class ShoppingCartDaoImpl implements ShoppingCartDao {
         Session session = null;
         Transaction transaction = null;
         try {
-            session = sessionFactory.openSession();
+            session = factory.openSession();
             transaction = session.beginTransaction();
             session.update(shoppingCart);
             transaction.commit();

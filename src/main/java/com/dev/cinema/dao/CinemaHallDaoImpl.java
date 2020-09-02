@@ -6,66 +6,39 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class CinemaHallDaoImpl implements CinemaHallDao {
-    private final SessionFactory sessionFactory;
+public class CinemaHallDaoImpl extends GenericDaoImpl<CinemaHall> implements CinemaHallDao {
+    private final SessionFactory factory;
 
     @Autowired
-    public CinemaHallDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public CinemaHallDaoImpl(SessionFactory factory) {
+        super(factory);
+        this.factory = factory;
     }
 
     @Override
     public CinemaHall add(CinemaHall cinemaHall) {
-        Transaction transaction = null;
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            Long cinemaHallId = (Long) session.save(cinemaHall);
-            transaction.commit();
-            cinemaHall.setId(cinemaHallId);
-            return cinemaHall;
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new DataProcessingException("Can't insert cinema hall entity", e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+        cinemaHall = super.add(cinemaHall);
+        return cinemaHall;
     }
 
     @Override
     public List<CinemaHall> getAll() {
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
+        try (Session session = factory.openSession()) {
             CriteriaQuery<CinemaHall> criteriaQuery = session.getCriteriaBuilder()
                     .createQuery(CinemaHall.class);
             criteriaQuery.from(CinemaHall.class);
             return session.createQuery(criteriaQuery).getResultList();
         } catch (Exception e) {
-            throw new DataProcessingException("Error retrieving all cinema halls", e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            throw new DataProcessingException("Can't get list of all cinema halls ", e);
         }
     }
 
     @Override
-    public CinemaHall getById(Long cinemaHallId) {
-        try (Session session = sessionFactory.openSession()) {
-            return session.get(CinemaHall.class, cinemaHallId);
-        } catch (Exception e) {
-            throw new DataProcessingException("Can't get cinema hall with id = " + cinemaHallId, e);
-        }
+    public CinemaHall getById(Long hallId) {
+        return super.getById(hallId, CinemaHall.class);
     }
 }

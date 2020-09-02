@@ -17,10 +17,20 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDateTime orderDate;
-    @ManyToOne
-    private User user;
     @OneToMany
     private List<Ticket> tickets;
+    @ManyToOne
+    private User user;
+
+    public Order() {
+
+    }
+
+    public Order(List<Ticket> tickets, User user, LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+        this.tickets = tickets;
+        this.user = user;
+    }
 
     public Long getId() {
         return id;
@@ -28,22 +38,6 @@ public class Order {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public List<Ticket> getTickets() {
@@ -54,9 +48,29 @@ public class Order {
         this.tickets = tickets;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
     @Override
     public String toString() {
-        return "Order{" + "id=" + id + ", orderDate="
-                + orderDate + ", user=" + user + ", tickets=" + tickets + '}';
+        return "Order{"
+                + "id=" + id
+                + ", orderDate=" + orderDate
+                + ", tickets=" + tickets
+                + ", user=" + user
+                + '}';
     }
 }

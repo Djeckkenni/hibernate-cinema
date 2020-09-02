@@ -8,8 +8,10 @@ public class PasswordsCheckValidator implements
         ConstraintValidator<PasswordsCheck, UserRequestDto> {
 
     @Override
-    public boolean isValid(UserRequestDto userRegistrationDto, ConstraintValidatorContext
+    public boolean isValid(UserRequestDto userRequestDto, ConstraintValidatorContext
             constraintValidatorContext) {
-        return userRegistrationDto.getPassword().equals(userRegistrationDto.getRepeatPassword());
+        String password = userRequestDto.getPassword();
+        String repeatPassword = userRequestDto.getRepeatPassword();
+        return password != null && password.equals(repeatPassword);
     }
 }

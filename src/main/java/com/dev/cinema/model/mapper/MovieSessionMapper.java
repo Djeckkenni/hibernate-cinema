@@ -8,6 +8,7 @@ import com.dev.cinema.model.dto.MovieSessionResponseDto;
 import com.dev.cinema.service.CinemaHallService;
 import com.dev.cinema.service.MovieService;
 import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,12 +16,13 @@ public class MovieSessionMapper {
     private final CinemaHallService cinemaHallService;
     private final MovieService movieService;
 
+    @Autowired
     public MovieSessionMapper(CinemaHallService cinemaHallService, MovieService movieService) {
         this.cinemaHallService = cinemaHallService;
         this.movieService = movieService;
     }
 
-    public MovieSession getMovieSession(MovieSessionRequestDto movieSessionRequestDto) {
+    public MovieSession convertToMovieSession(MovieSessionRequestDto movieSessionRequestDto) {
         MovieSession movieSession = new MovieSession();
         Movie movie = movieService.getById(movieSessionRequestDto.getMovieId());
         movieSession.setMovie(movie);
@@ -30,8 +32,10 @@ public class MovieSessionMapper {
         return movieSession;
     }
 
-    public MovieSessionResponseDto getMovieSessionDto(MovieSession movieSession) {
+    public MovieSessionResponseDto convertToResponseDto(MovieSession movieSession) {
         MovieSessionResponseDto movieSessionResponseDto = new MovieSessionResponseDto();
+        movieSessionResponseDto.setMovieSessionId(movieSession.getId());
+        movieSessionResponseDto.setMovieId(movieSession.getMovie().getId());
         movieSessionResponseDto.setMovieTitle(movieSession.getMovie().getTitle());
         movieSessionResponseDto.setHallDescription(movieSession.getCinemaHall().getDescription());
         movieSessionResponseDto.setShowTime(movieSession.getShowTime().toString());

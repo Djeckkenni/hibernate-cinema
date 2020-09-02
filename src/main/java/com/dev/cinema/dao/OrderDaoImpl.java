@@ -6,45 +6,34 @@ import com.dev.cinema.model.User;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class OrderDaoImpl implements OrderDao {
-    private final SessionFactory sessionFactory;
+public class OrderDaoImpl extends GenericDaoImpl<Order> implements OrderDao {
+    private final SessionFactory factory;
 
     @Autowired
-    public OrderDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    public OrderDaoImpl(SessionFactory factory) {
+        super(factory);
+        this.factory = factory;
     }
 
     @Override
-    public Order create(Order order) {
-        Session session = null;
-        Transaction transaction = null;
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            session.save(order);
-            transaction.commit();
-            return order;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw new DataProcessingException("Can't insert Order", e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
+    public Order add(Order order) {
+        order = super.add(order);
+        return order;
+    }
+
+    @Override
+    public Order getById(Long id) {
+        return super.getById(id, Order.class);
     }
 
     @Override
     public List<Order> getOrderHistory(User user) {
-        try (Session session = sessionFactory.openSession()) {
+        try (Session session = factory.openSession()) {
             Query<Order> query = session
                     .createQuery("select distinct o from Order o "
                             + "left join fetch o.tickets Ticket "
@@ -52,9 +41,8 @@ public class OrderDaoImpl implements OrderDao {
             query.setParameter("user", user);
             return query.list();
         } catch (Exception e) {
-            throw new DataProcessingException("Can't find order of user with id "
+            throw new DataProcessingException("Can't find orders of user with id "
                     + user.getId(), e);
         }
     }
 }
-
